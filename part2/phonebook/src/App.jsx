@@ -59,6 +59,8 @@ const App = () => {
 
   const handleDelete = selectedPerson => {
     console.log('selectedPerson', selectedPerson)
+    personService.deletePerson(selectedPerson)
+    .then(response)
   }
 
 
