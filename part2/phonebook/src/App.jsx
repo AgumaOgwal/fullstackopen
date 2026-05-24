@@ -1,16 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SearchFilter from './components/SearchFilter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
-
+import personService from './services/persons'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '1232435234' }
-  ])
+
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterBy, setFilterBy] = useState('')
+
+  useEffect(() => {
+      personService
+      .getAllPersons()
+      .then(response => setPersons(response.data))
+  }, [])
 
   const handleOnChangeName = (event) => {
     console.log('input', event.target.value)
@@ -24,19 +29,39 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault()
-    const nameExists = persons.find(x => x.name === newName)
+    
+    const nameExists = persons.find(x => {
+      console.log('x.name',x.name)
+      console.log('newName', newName)
+      return x.name === newName
+  })
+
     console.log('nameExists', nameExists)
     if (nameExists !== undefined) {
       alert(`${newName} is already added to phonebook`)
-    } else {
-      const newPersons = [...persons, { name: newName, number: newNumber }]
-      console.log('New Persons', newPersons)
+    } else { 
+      const newPerson = {
+        name: newName,
+        number: newNumber
+      }
 
-      setPersons(newPersons)
-      setNewName('')
-      setNewNumber('')
+      useEffect, (
+        personService
+        .createPerson(newPerson)
+        .then(response => {
+           setPersons(persons.concat(response.data))
+           setNewName('')
+           setNewNumber('')
+        }),[])
+
     }
   }
+
+  const handleDelete = selectedPerson => {
+    console.log('selectedPerson', selectedPerson)
+  }
+
+
 
   const filterNames = (event) => {
     setFilterBy(event.target.value)
@@ -50,10 +75,6 @@ const App = () => {
     })
     console.log('Filtered List', filteredList)
     setPersons(filteredList)
-    /* if (filteredList.length > 0) {
-      setPersons(filteredList)
-    } else { setPersons([persons]) } */
-
   }
 
 
@@ -70,11 +91,7 @@ const App = () => {
         handleOnChangeNumber={handleOnChangeNumber}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} />
-      {/* {persons.map(person =>
-        <p key={person.name}>{person.name} {person.number}</p>
-      )} */}
-      {/* <div>debug: {newName}</div> */}
+      <Persons persons={persons} handleDelete={handleDelete} />
     </div>
   )
 }
