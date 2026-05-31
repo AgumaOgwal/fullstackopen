@@ -4,6 +4,7 @@ import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personService from './services/persons'
 import './index.css'
+import Notification from './components/Notification'
 
 const App = () => {
 
@@ -13,6 +14,8 @@ const App = () => {
   const [filterBy, setFilterBy] = useState('')
   const [deleted, setDeleted] = useState(false)
   const [updated, setUpdated] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState('')
+  const [notificationDisplayed, setNotifDisplayed] = useState(false)
 
   useEffect(() => {
       personService
@@ -23,6 +26,15 @@ const App = () => {
         setUpdated(false)
         })
   }, [deleted, updated])
+
+  useEffect(() => {
+    if (!notificationDisplayed) return;
+
+    setTimeout(() => {
+      setNotifDisplayed(false)
+      setNotificationMessage('')
+    }, 2000)
+  }, [notificationDisplayed])
 
   const handleOnChangeName = (event) => {
     //console.log('input', event.target.value)
@@ -58,6 +70,12 @@ const App = () => {
           .then(response => {
             setUpdated(true)
             console.log('updated response', response.data)
+            setNotificationMessage(`${response.data.name}'s number was updated`)
+            setNotifDisplayed(true)
+          })
+          .catch( error => {
+            setNotificationMessage(`${newPerson.name} was already deleted from phonebook`)
+            setNotifDisplayed(true)
           })
         }
       }
@@ -75,6 +93,8 @@ const App = () => {
            setPersons(persons.concat(response.data))
            setNewName('')
            setNewNumber('')
+           setNotificationMessage(`${response.data.name} was added`)
+           setNotifDisplayed(true)
         })
     }
   }
@@ -82,7 +102,13 @@ const App = () => {
   const handleDelete = selectedPerson => {
     if (window.confirm(`Delete ${selectedPerson.name} ?`)){
       personService.deletePerson(selectedPerson)
-      .then(response => setDeleted(true))
+      .then(response => {
+        
+        setDeleted(true) 
+        setNotificationMessage(`${response.data.name} was deleted`)
+        setNotifDisplayed(true)
+      })
+      
     } 
   }
 
@@ -105,6 +131,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={notificationMessage} />
       <SearchFilter filterBy={filterBy} filterNames={filterNames} />
       <h2>add new</h2>
       <PersonForm
