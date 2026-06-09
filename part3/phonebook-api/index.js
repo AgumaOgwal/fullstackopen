@@ -5,8 +5,9 @@ const app = express()
 
 app.use(express.json())
 
-morgan.token('reqbody', (req, res) =>  JSON.stringify(req.body) )
+app.use(express.static('dist'))
 
+morgan.token('reqbody', (req, res) =>  JSON.stringify(req.body) )
 
 app.use(morgan(':method :url :status :response-time :reqbody'))
 
