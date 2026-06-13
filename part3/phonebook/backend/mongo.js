@@ -15,7 +15,7 @@ const url = `mongodb+srv://fullstack:${password}@cluster0.r1wvntm.mongodb.net/?a
 
 mongoose.set('strictQuery', false)
 
-mongoose.connect(url, { family : 4} )
+mongoose.connect(url, { family : 4 } )
 
 const personSchema = new mongoose.Schema({
     name: {
@@ -37,13 +37,14 @@ if (name === null && number === null)  {
     })
 
 } else {
-const person = new Person({
-    name: name,
-    number: number
-})
+    const person = new Person({
+        name: name,
+        number: number
+    })
 
-person.save().then( result => {
-    console.log(`added ${name} number ${number} to phonebook`)
-    mongoose.connection.close()
-})
+    person.save().then( (result) => {
+        console.log(result)
+        console.log(`added ${name} number ${number} to phonebook`)
+        mongoose.connection.close()
+    })
 }

@@ -11,7 +11,7 @@ app.use(express.static('dist'))
 
 app.use(express.json())
 
-morgan.token('reqbody', (req, res) => JSON.stringify(req.body))
+morgan.token('reqbody', (req) => JSON.stringify(req.body))
 
 app.use(morgan(':method :url :status :response-time :reqbody'))
 
@@ -21,10 +21,11 @@ app.get('/info', (request, response, next) => {
         const res = `<p>Phonebook has info for ${persons.length} people</p>
     <p>${new Date().toString()}</p>`
 
-    response.send(res)
+        response.send(res)
 
     })
-    
+        .catch(error => next(error))
+
 })
 
 app.get('/api/persons', (request, response, next) => {
@@ -54,6 +55,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
 
     Person.findByIdAndDelete(id)
         .then(person => {
+            console.log(person.name)
             response.status(204).end()
         })
         .catch(error => next(error))
@@ -65,7 +67,7 @@ app.post('/api/persons/', (request, response, next) => {
     const name = request.body.name
     const number = request.body.number
     if (!name || !number) {
-        response.status(400).json({ error: "name or number missing" })
+        response.status(400).json({ error: 'name or number missing' })
         return
     }
 
@@ -76,6 +78,7 @@ app.post('/api/persons/', (request, response, next) => {
     })
 
     person.save().then(result => {
+        console.log(result)
         console.log(`added ${name} number ${number} to phonebook`)
         response.json('success')
     })
@@ -111,7 +114,7 @@ const errorHandler = (error, request, response, next) => {
         return response.status(400).send({ error: 'malformed id' })
     } else if (error.name === 'ValidationError') {
         console.log(error.message)
-        return response.status(400).send( { error: error.message})
+        return response.status(400).send( { error: error.message })
     }
 
     next(error)
